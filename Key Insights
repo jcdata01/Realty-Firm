@@ -1,0 +1,51 @@
+-- Query 1: ﻿﻿What is the ratio of listings sold (Listing_Status = 'Sold') ﻿﻿to total listings by property type? 
+SELECT p. property_type,
+CONCAT (
+ROUND
+(SUM (IF (1. listing_status = 'SOLD', 1,0)) /
+SUM (IF (1. listing_status = 'SOLD', 1,1)) * 100,2),
+"%') as sold_ratio
+FROM LISTINGS l
+JOIN properties p
+ON l.property_id = p. property_id
+GROUP BY p.property_type;
+
+-- Query 2: For sold properties, what is the lowest difference, highest difference, and average difference between the initial Listing_Price and the Final_Price?
+WITH diff AS
+	(SELECT l.listing_id, listing_price, final_price,
+	final_price - listing_price as difference
+	FROM 
+		LISTINGS l
+		JOIN SALES s
+		ON l.listing_id = s.listing_id)
+SELECT min(difference) lowest_difference, max(difference) highest_difference, 
+avg(difference) average_difference
+FROM diff;
+
+-- Query 3: What is the average Square_Footage and Bedrooms count for properties that sell in <$300k vs. $300k−$700k vs. >$700k tiers? Also label those price ranges as cheap, moderate, and expensive respectively.
+WITH label_table AS
+	(SELECT 
+		p.property_id, listing_price, square_footage, bedrooms,
+		CASE
+			WHEN listing_price < 300000 THEN 'cheap'
+			WHEN listing_price < 700000 THEN 'moderate'
+			ELSE 'expensive'
+		END AS label
+	FROM PROPERTIES p
+		JOIN LISTINGS l
+		ON p.property_id = l.property_id)
+SELECT label, avg(square_footage), avg(bedrooms)
+FROM label_table
+GROUP BY label;
+
+-- Query 4: What are the unique names and emails of the sellers with pending listings?
+SELECT DISTINCT l.seller_id, first_name, last_name, email
+FROM LISTINGS l
+JOIN SELLERS s
+ON l.seller_id = s.seller_id
+WHERE listing_status = 'pending'
+ORDER BY l.seller_id;
+
+-- Query 5: Since the site no longer accepts yahoo as an email carrier, change all current users with yahoo emails to a realtyone email.
+SELECT REPLACE(email, 'yahoo.com', 'realtyone.com')
+FROM users
