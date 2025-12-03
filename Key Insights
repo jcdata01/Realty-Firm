@@ -1,10 +1,10 @@
 -- Query 1: ﻿﻿What is the ratio of listings sold (Listing_Status = 'Sold') ﻿﻿to total listings by property type? 
 SELECT p.property_type,
 CONCAT (
-ROUND
-(SUM (IF (1. listing_status = 'SOLD', 1,0)) /
-SUM (IF (1. listing_status = 'SOLD', 1,1)) * 100,2),
-"%') as sold_ratio
+	ROUND
+	(SUM (IF (1. listing_status = 'SOLD', 1,0)) /
+	SUM (IF (1. listing_status = 'SOLD', 1,1)) * 100,2),
+	"%') as sold_ratio
 FROM LISTINGS l
 JOIN properties p
 ON l.property_id = p. property_id
